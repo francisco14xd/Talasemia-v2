@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Presentación: Talasemia y Evolución</title>
+    <!-- Tailwind CSS para estilos -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Iconos Lucide -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* Estilos base y animaciones suaves */
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .slide-transition { transition: all 0.5s ease-in-out; }
+        .fade-in { animation: fadeIn 0.5s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body class="bg-gray-900 h-screen flex flex-col items-center justify-center overflow-hidden text-gray-800">
+
+    <!-- Contenedor Principal de la Diapositiva -->
+    <div id="slide-container" class="relative w-full max-w-6xl aspect-video bg-white shadow-2xl rounded-xl overflow-hidden flex flex-col transition-all duration-500">
+        
+        <!-- Header (Título y Número) -->
+        <div class="absolute top-0 left-0 w-full p-6 flex justify-between items-start z-10">
+            <div class="flex items-center space-x-3">
+                <div id="slide-icon-container" class="hidden md:block p-2 bg-blue-100 rounded-full text-blue-700 transition-colors duration-300">
+                    <!-- Icono inyectado por JS -->
+                </div>
+                <div>
+                    <h1 id="slide-title" class="text-2xl md:text-3xl font-bold transition-colors duration-300">Título</h1>
+                    <h2 id="slide-subtitle" class="text-lg md:text-xl text-gray-500 font-medium hidden md:block">Subtítulo</h2>
+                </div>
+            </div>
+            <div class="text-gray-400 font-mono text-sm bg-white/50 px-3 py-1 rounded backdrop-blur-sm">
+                <span id="slide-number">1</span> / <span id="total-slides">10</span>
+            </div>
+        </div>
+
+        <!-- Cuerpo del Contenido (Inyectado por JS) -->
+        <div id="slide-content" class="flex-grow p-8 pt-24 pb-16 overflow-y-auto fade-in">
+            <!-- El contenido dinámico va aquí -->
+        </div>
+
+        <!-- Footer (Pie de página) -->
+        <div class="absolute bottom-0 w-full bg-gray-50/90 border-t border-gray-200 p-3 flex justify-between items-center text-xs text-gray-500 px-8 backdrop-blur-sm">
+            <span>Talasemia y Evolución</span>
+            <span id="slide-footer" class="font-semibold text-blue-600 hidden sm:inline"></span>
+            <span>Biología Evolutiva</span>
+        </div>
+    </div>
+
+    <!-- Controles de Navegación -->
+    <div class="mt-6 flex items-center space-x-6 z-20">
+        <button id="btn-prev" class="p-3 bg-gray-800 text-white rounded-full hover:bg-gray-700 disabled:opacity-30 disabled:cursor-not-allowed transition transform hover:scale-110">
+            <i data-lucide="chevron-left"></i>
+        </button>
+
+        <div class="text-gray-400 font-medium select-none">
+            Diapositiva <span id="ctrl-current">1</span> de <span id="ctrl-total">10</span>
+        </div>
+
+        <button id="btn-next" class="p-3 bg-blue-600 text-white rounded-full hover:bg-blue-500 disabled:opacity-30 disabled:cursor-not-allowed transition shadow-lg shadow-blue-500/30 transform hover:scale-110">
+            <i data-lucide="chevron-right"></i>
+        </button>
+
+        <button id="btn-fullscreen" class="ml-4 p-3 bg-gray-800 text-gray-300 rounded-full hover:bg-gray-700 hover:text-white transition" title="Pantalla Completa">
+            <i data-lucide="maximize"></i>
+        </button>
+    </div>
+
+    <!-- Barra de Progreso -->
+    <div class="mt-4 w-64 h-1 bg-gray-800 rounded-full overflow-hidden">
+        <div id="progress-bar" class="h-full bg-blue-500 transition-all duration-300" style="width: 10%;"></div>
+    </div>
+
+    <!-- Lógica de la Aplicación -->
+    <script>
+        // --- DATA DE LAS DIAPOSITIVAS ---
+        const slides = [
+            {
+                id: 1,
+                title: "La Talasemia: Una Ventana a la Evolución Humana",
+                subtitle: "Mecanismos Genéticos, Adaptación y el Coste de la Supervivencia",
+                icon: null, // Icono especial en contenido
+                bgClass: "bg-gradient-to-br from-blue-50 to-indigo-100",
+                titleColor: "text-gray-800",
+                footer: "",
+                content: `
+                    <div class="flex flex-col items-center justify-center h-full space-y-8 text-center">
+                        <div class="p-6 bg-blue-100 rounded-full animate-pulse">
+                            <i data-lucide="dna" class="w-20 h-20 text-blue-600"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-semibold text-gray-700 mb-4">Integrantes del Grupo</h3>
+                            <div class="p-6 bg-white/60 rounded-xl backdrop-blur-sm border border-gray-200 shadow-sm inline-block">
+                                <p class="text-gray-900 font-medium text-lg">Franco Gajardo • Alonso Fuentes • Emilia Gajardo • Francisco Gajardo</p>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                id: 2,
+                title: "¿Qué es la Talasemia?",
+                subtitle: "Falla en la Producción de Hemoglobina",
+                icon: "activity",
+                bgClass: "bg-white",
+                titleColor: "text-blue-900",
+                footer: "",
+                content: `
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 h-full items-center">
+                        <div class="space-y-6">
+                            <div class="bg-white p-5 rounded-lg shadow-md border-l-4 border-red-500">
+                                <h4 class="font-bold text-lg text-gray-800 mb-2">Definición</h4>
+                                <p class="text-gray-600">Trastorno hereditario caracterizado por síntesis defectuosa de la <strong>Hemoglobina</strong> (específicamente sus cadenas alfa o beta).</p>
+                            </div>
+                            <div class="bg-white p-5 rounded-lg shadow-md border-l-4 border-blue-500">
+                                <h4 class="font-bold text-lg text-gray-800 mb-2">Fenotipo Clínico</h4>
+                                <p class="text-gray-600">Desde anemia leve asintomática hasta formas graves dependientes de transfusión (Talasemia Mayor).</p>
+                            </div>
+                        </div>
+                        <div class="bg-blue-900 text-white p-8 rounded-xl shadow-xl">
+                            <h4 class="font-bold text-xl mb-6 border-b border-blue-700 pb-2">Clasificación</h4>
+                            <ul class="space-y-6">
+                                <li class="flex items-start">
+                                    <span class="bg-red-500 text-xs font-bold px-2 py-1 rounded mr-3 mt-1">ALFA</span>
+                                    <div>
+                                        <span class="font-semibold block text-lg">Alfa-Talasemia</span>
+                                        <span class="text-sm text-blue-200">Cromosoma 16 (HBA1, HBA2)</span>
+                                    </div>
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="bg-yellow-500 text-xs font-bold px-2 py-1 rounded mr-3 mt-1 text-black">BETA</span>
+                                    <div>
+                                        <span class="font-semibold block text-lg">Beta-Talasemia</span>
+                                        <span class="text-sm text-blue-200">Cromosoma 11 (HBB)</span>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                id: 3,
+                title: "Herencia y Genética",
+                subtitle: "Mecanismos Genéticos (Parte 1)",
+                icon: "dna",
+                bgClass: "bg-white",
+                titleColor: "text-blue-900",
+                footer: "",
+                content: `
+                    <div class="flex flex-col space-y-8 h-full justify-center">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+                            <div class="p-6 bg-indigo-50 rounded-lg border border-indigo-200">
+                                <h4 class="font-bold text-indigo-800 text-lg">Tipo de Herencia</h4>
+                                <p class="text-gray-600 mt-2">Principalmente <br/><span class="font-bold text-indigo-600">Monogénica (Mendeliana)</span></p>
+                            </div>
+                            <div class="p-6 bg-indigo-50 rounded-lg border border-indigo-200">
+                                <h4 class="font-bold text-indigo-800 text-lg">Genes Candidatos</h4>
+                                <p class="text-gray-600 mt-2 italic">HBA1, HBA2 (Alfa)<br/>HBB (Beta)</p>
+                            </div>
+                            <div class="p-6 bg-indigo-50 rounded-lg border border-indigo-200">
+                                <h4 class="font-bold text-indigo-800 text-lg">Aparición</h4>
+                                <p class="text-gray-600 mt-2">Desde nacimiento (Grave)<br/>hasta adultez (Leve)</p>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-gray-50 p-6 rounded-xl border-2 border-dashed border-gray-300">
+                            <h4 class="font-bold text-gray-700 mb-3 flex items-center text-lg">
+                                <i data-lucide="shield" class="w-5 h-5 mr-2"></i> Expresividad y Penetrancia
+                            </h4>
+                            <ul class="list-disc pl-6 space-y-3 text-gray-600">
+                                <li><strong>Penetrancia:</strong> Generalmente alta en formas homocigotas.</li>
+                                <li><strong>Expresividad Variable:</strong> La gravedad clínica cambia. Ej: En Beta-Talasemia, puede ser modulada por la persistencia de Hemoglobina Fetal (HbF).</li>
+                            </ul>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                id: 4,
+                title: "Heterogeneidad y Distribución",
+                subtitle: "Mecanismos Genéticos (Parte 2)",
+                icon: "globe",
+                bgClass: "bg-white",
+                titleColor: "text-blue-900",
+                footer: "",
+                content: `
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 h-full items-center">
+                        <div class="space-y-6">
+                            <div class="bg-orange-50 p-6 rounded-lg border-l-4 border-orange-500">
+                                <h4 class="font-bold text-orange-800 mb-2">Heterogeneidad Alélica</h4>
+                                <p class="text-gray-700">Múltiples mutaciones diferentes dentro del mismo gen pueden causar la enfermedad.</p>
+                                <div class="mt-3 text-xs font-mono bg-orange-100 p-1 px-2 inline-block rounded text-orange-900">Ej: +200 mutaciones en HBB</div>
+                            </div>
+                            <div class="bg-purple-50 p-6 rounded-lg border-l-4 border-purple-500">
+                                <h4 class="font-bold text-purple-800 mb-2">Heterogeneidad Genética</h4>
+                                <p class="text-gray-700">Mutaciones en distintos genes (HBA vs HBB) resultan en fenotipos similares (Anemia).</p>
+                            </div>
+                        </div>
+                        
+                        <div class="relative bg-blue-50 p-8 rounded-xl border border-blue-200 h-full flex flex-col justify-center">
+                            <h4 class="font-bold text-blue-900 mb-2 text-center text-xl">Frecuencia Alélica: "Hotspots"</h4>
+                            <p class="text-xs text-center text-gray-500 mb-6">Porcentaje estimado de portadores en la población</p>
+                            
+                            <div class="space-y-5">
+                                <div class="flex justify-between px-3 text-xs font-bold text-gray-400 uppercase tracking-wider">
+                                    <span>Región</span>
+                                    <span>Prevalencia</span>
+                                </div>
+
+                                <div class="flex items-center justify-between bg-white p-4 rounded shadow-sm">
+                                    <span class="font-medium text-gray-700">Mediterráneo</span>
+                                    <div class="flex items-center">
+                                        <span class="text-sm font-bold text-red-600 mr-3">~10-15%</span>
+                                        <div class="w-24 h-3 bg-red-100 rounded-full overflow-hidden"><div class="h-full bg-red-500 w-[75%]"></div></div>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-center justify-between bg-white p-4 rounded shadow-sm">
+                                    <span class="font-medium text-gray-700">Oriente Medio</span>
+                                    <div class="flex items-center">
+                                        <span class="text-sm font-bold text-red-600 mr-3">~5-10%</span>
+                                        <div class="w-24 h-3 bg-red-100 rounded-full overflow-hidden"><div class="h-full bg-red-500 w-[50%]"></div></div>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-center justify-between bg-white p-4 rounded shadow-sm">
+                                    <span class="font-medium text-gray-700">Sudeste Asiático</span>
+                                    <div class="flex items-center">
+                                        <span class="text-sm font-bold text-red-600 mr-3">~5-20%</span>
+                                        <div class="w-24 h-3 bg-red-100 rounded-full overflow-hidden"><div class="h-full bg-red-500 w-[85%]"></div></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <p class="mt-8 text-sm text-center text-gray-500 italic flex justify-center items-center">
+                                <i data-lucide="map-pin" class="w-3 h-3 mr-1"></i> Superposición exacta con zonas históricas de Malaria.
+                            </p>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                id: 5,
+                title: "El Factor Evolutivo Clave",
+                subtitle: "Selección Balanceadora",
+                icon: "shield",
+                bgClass: "bg-white",
+                titleColor: "text-blue-900",
+                footer: "",
+                content: `
+                    <div class="flex flex-col h-full space-y-8">
+                        <div class="bg-green-100 p-6 rounded-xl text-center shadow-inner">
+                            <h3 class="text-2xl font-bold text-green-800 mb-2">Protección contra Malaria</h3>
+                            <p class="text-green-700 text-lg">El corazón evolutivo de la Talasemia</p>
+                        </div>
+
+                        <div class="grid grid-cols-3 gap-4 flex-grow items-center">
+                            <!-- AA -->
+                            <div class="text-center opacity-50 transform scale-90">
+                                <div class="mx-auto w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center mb-3 font-bold text-gray-600 border-4 border-gray-300 text-xl">
+                                    AA
+                                </div>
+                                <p class="text-base font-bold text-gray-700">Sano</p>
+                                <p class="text-sm font-bold text-red-600 mt-1">Riesgo Malaria</p>
+                                <p class="text-xs text-gray-500">Mortalidad por infección</p>
+                            </div>
+
+                            <!-- Aa - Highlighted -->
+                            <div class="text-center transform scale-110 z-10">
+                                <div class="mx-auto w-32 h-32 rounded-full bg-green-100 flex items-center justify-center mb-3 font-bold text-green-800 border-8 border-green-500 shadow-2xl text-2xl">
+                                    Aa
+                                </div>
+                                <p class="text-lg font-bold text-green-800">Portador</p>
+                                <p class="text-sm font-bold text-green-600 mt-1">Ventaja Heterocigota</p>
+                                <p class="text-xs text-gray-600">Protección vs P. falciparum</p>
+                                <div class="mt-3 bg-green-600 text-white text-xs py-1 px-3 rounded-full inline-block font-bold tracking-wide">SELECCIONADO</div>
+                            </div>
+
+                            <!-- aa -->
+                            <div class="text-center opacity-50 transform scale-90">
+                                <div class="mx-auto w-24 h-24 rounded-full bg-red-100 flex items-center justify-center mb-3 font-bold text-red-800 border-4 border-red-300 text-xl">
+                                    aa
+                                </div>
+                                <p class="text-base font-bold text-gray-700">Enfermo</p>
+                                <p class="text-sm font-bold text-red-600 mt-1">Riesgo Talasemia</p>
+                                <p class="text-xs text-gray-500">Mortalidad por anemia</p>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-gray-100 p-4 rounded-lg text-sm text-gray-700 text-center border border-gray-200">
+                            <strong>Concepto:</strong> Alelos desventajosos (enfermedad) se mantienen en la población porque confieren ventaja de supervivencia en estado heterocigoto.
+                        </div>
+                    </div>
+                `
+            },
+            {
+                id: 6,
+                title: "Coevolución e Historias de Vida",
+                subtitle: "El Precio de la Adaptación",
+                icon: "users",
+                bgClass: "bg-white",
+                titleColor: "text-blue-900",
+                footer: "",
+                content: `
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 h-full items-center">
+                        <div class="space-y-5">
+                            <h4 class="font-bold text-gray-800 border-b pb-2 text-lg">Procesos Evolutivos</h4>
+                            <div class="p-4 bg-blue-50 rounded border-l-4 border-blue-500">
+                                <strong class="block text-blue-900 mb-1">1. Coevolución</strong>
+                                <span class="text-sm text-gray-600">Humanos vs Plasmodium. El genoma cambia para resistir al patógeno.</span>
+                            </div>
+                            <div class="p-4 bg-red-50 rounded border-l-4 border-red-500">
+                                <strong class="block text-red-900 mb-1">2. Discordancia Evolutiva</strong>
+                                <span class="text-sm text-gray-600">En ambientes NUEVOS (sin malaria), la ventaja desaparece. El alelo es solo un riesgo.</span>
+                            </div>
+                            <div class="p-4 bg-yellow-50 rounded border-l-4 border-yellow-500">
+                                <strong class="block text-yellow-900 mb-1">3. Historias Demográficas</strong>
+                                <span class="text-sm text-gray-600">Migraciones modernas llevan el alelo a zonas no endémicas (Salud Pública Global).</span>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-gray-800 text-white p-8 rounded-xl shadow-lg flex flex-col justify-center h-auto">
+                            <h4 class="font-bold text-xl mb-6 text-center text-yellow-400">Pleiotropía Antagonista</h4>
+                            <div class="relative border-l-2 border-gray-600 ml-4 space-y-10 py-2">
+                                <div class="relative pl-8">
+                                    <div class="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-green-500 ring-4 ring-gray-800"></div>
+                                    <strong class="text-green-400 text-lg block">Juventud</strong>
+                                    <p class="text-sm text-gray-300 mt-1">Protección y supervivencia reproductiva.</p>
+                                </div>
+                                <div class="relative pl-8">
+                                    <div class="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-red-500 ring-4 ring-gray-800"></div>
+                                    <strong class="text-red-400 text-lg block">Adultez / Vejez</strong>
+                                    <p class="text-sm text-gray-300 mt-1">Efectos negativos: Anemia, daño órganos, sobrecarga de hierro.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                id: 7,
+                title: "Restricciones y Defensas",
+                subtitle: "Consecuencias del Trade-Off",
+                icon: "alert-triangle",
+                bgClass: "bg-white",
+                titleColor: "text-blue-900",
+                footer: "",
+                content: `
+                    <div class="flex flex-col justify-center h-full space-y-8">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-gray-600 hover:shadow-lg transition">
+                                <h4 class="font-bold text-gray-800 mb-3 flex items-center"><i data-lucide="lock" class="w-4 h-4 mr-2"></i> Restricciones</h4>
+                                <p class="text-sm text-gray-600 leading-relaxed">La evolución no es perfecta. No puede "rediseñar" la hemoglobina desde cero; está limitada por la estructura física de la proteína.</p>
+                            </div>
+                            <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-red-600 hover:shadow-lg transition">
+                                <h4 class="font-bold text-gray-800 mb-3 flex items-center"><i data-lucide="shield-alert" class="w-4 h-4 mr-2"></i> Defensa Excesiva</h4>
+                                <p class="text-sm text-gray-600 leading-relaxed">Mecanismos descontrolados: Eritropoyesis ineficaz y absorción masiva de hierro (Hemosiderosis) dañan al propio cuerpo.</p>
+                            </div>
+                            <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-pink-500 hover:shadow-lg transition">
+                                <h4 class="font-bold text-gray-800 mb-3 flex items-center"><i data-lucide="heart" class="w-4 h-4 mr-2"></i> Selección Sexual</h4>
+                                <p class="text-sm text-gray-600 leading-relaxed">Indirectamente, sobrevivir a la malaria en la niñez permite llegar a la edad reproductiva y competir por pareja.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-amber-50 p-6 rounded-xl border border-amber-200 text-center max-w-3xl mx-auto">
+                            <p class="text-amber-900 font-serif text-lg italic">"La solución evolutiva no fue la perfección, sino un compromiso (trade-off) aceptable para la supervivencia."</p>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                id: 8,
+                title: "Medicina Evolutiva",
+                subtitle: "Integración Biología y Salud",
+                icon: "heart-pulse",
+                bgClass: "bg-white",
+                titleColor: "text-blue-900",
+                footer: "",
+                content: `
+                    <div class="h-full flex flex-col justify-center">
+                        <h3 class="text-xl text-center text-gray-700 mb-8 font-medium">¿Cómo cambia la evolución nuestra práctica médica?</h3>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                            <div class="bg-gradient-to-br from-blue-500 to-blue-600 text-white p-8 rounded-2xl shadow-xl transform transition hover:scale-105 hover:-translate-y-2">
+                                <div class="bg-white/20 w-12 h-12 rounded-full flex items-center justify-center mb-6 font-bold text-xl">1</div>
+                                <h4 class="font-bold text-xl mb-3">Prevención</h4>
+                                <p class="text-blue-100 text-sm leading-relaxed">Programas de Screening dirigidos a poblaciones de riesgo histórico (mapa de malaria).</p>
+                            </div>
+                            
+                            <div class="bg-gradient-to-br from-purple-500 to-purple-600 text-white p-8 rounded-2xl shadow-xl transform transition hover:scale-105 hover:-translate-y-2">
+                                <div class="bg-white/20 w-12 h-12 rounded-full flex items-center justify-center mb-6 font-bold text-xl">2</div>
+                                <h4 class="font-bold text-xl mb-3">Tratamiento</h4>
+                                <p class="text-purple-100 text-sm leading-relaxed">Gestionar la Pleiotropía: Tratamos la sobrecarga de hierro (consecuencia evolutiva) tanto como la anemia.</p>
+                            </div>
+                            
+                            <div class="bg-gradient-to-br from-teal-500 to-teal-600 text-white p-8 rounded-2xl shadow-xl transform transition hover:scale-105 hover:-translate-y-2">
+                                <div class="bg-white/20 w-12 h-12 rounded-full flex items-center justify-center mb-6 font-bold text-xl">3</div>
+                                <h4 class="font-bold text-xl mb-3">Comprensión</h4>
+                                <p class="text-teal-100 text-sm leading-relaxed">La enfermedad no es un error aleatorio, es un legado adaptativo. Cambia el estigma por historia biológica.</p>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                id: 9,
+                title: "Conclusiones",
+                subtitle: "Resumen: La Talasemia como Trade-Off",
+                icon: null,
+                bgClass: "bg-gradient-to-br from-gray-100 to-gray-200",
+                titleColor: "text-blue-900",
+                footer: "",
+                content: `
+                    <div class="h-full flex flex-col justify-center max-w-3xl mx-auto w-full">
+                        <ul class="space-y-5">
+                            <li class="flex items-center bg-white p-5 rounded-xl shadow-sm border-l-4 border-green-500 hover:shadow-md transition">
+                                <div class="bg-green-100 p-3 rounded-full mr-5 text-green-600">
+                                    <i data-lucide="dna" class="w-6 h-6"></i>
+                                </div>
+                                <span class="text-gray-700 text-lg">Trastorno monogénico con alta <strong>heterogeneidad alélica</strong>.</span>
+                            </li>
+                            <li class="flex items-center bg-white p-5 rounded-xl shadow-sm border-l-4 border-blue-500 hover:shadow-md transition">
+                                <div class="bg-blue-100 p-3 rounded-full mr-5 text-blue-600">
+                                    <i data-lucide="shield" class="w-6 h-6"></i>
+                                </div>
+                                <span class="text-gray-700 text-lg">Frecuencia explicada por <strong>Selección Balanceadora</strong> (Protección vs Malaria).</span>
+                            </li>
+                            <li class="flex items-center bg-white p-5 rounded-xl shadow-sm border-l-4 border-red-500 hover:shadow-md transition">
+                                <div class="bg-red-100 p-3 rounded-full mr-5 text-red-600">
+                                    <i data-lucide="globe" class="w-6 h-6"></i>
+                                </div>
+                                <span class="text-gray-700 text-lg">Hoy representa una <strong>Discordancia Evolutiva</strong> en zonas sin malaria.</span>
+                            </li>
+                            <li class="flex items-center bg-white p-5 rounded-xl shadow-sm border-l-4 border-purple-500 hover:shadow-md transition">
+                                <div class="bg-purple-100 p-3 rounded-full mr-5 text-purple-600">
+                                    <i data-lucide="book-open" class="w-6 h-6"></i>
+                                </div>
+                                <span class="text-gray-700 text-lg">La <strong>Medicina Evolutiva</strong> es clave para el manejo clínico moderno.</span>
+                            </li>
+                        </ul>
+                    </div>
+                `
+            },
+            {
+                id: 10,
+                title: "¿Preguntas?",
+                subtitle: "Muchas gracias por su atención",
+                icon: "message-circle",
+                bgClass: "bg-white",
+                titleColor: "text-blue-900",
+                footer: "",
+                content: `
+                    <div class="h-full flex flex-col items-center justify-center space-y-4">
+                        <div class="animate-bounce">
+                            <i data-lucide="message-circle" class="w-16 h-16 text-blue-500"></i>
+                        </div>
+                        <div class="bg-blue-50 p-6 rounded-2xl border border-blue-200 max-w-3xl w-full shadow-lg overflow-y-auto max-h-[60vh]">
+                            <h4 class="text-center font-bold text-gray-700 mb-4 border-b border-blue-200 pb-2 text-lg">Anticipación de Preguntas</h4>
+                            <ul class="space-y-3 text-gray-700 text-sm md:text-base">
+                                <li class="bg-white p-3 rounded-lg shadow-sm">
+                                    <strong class="text-blue-800 block mb-1">❓ ¿Por qué es tan grave la Talasemia Mayor?</strong>
+                                    R: Toxicidad por cadenas de <strong>Hemoglobina</strong> no apareadas, lo que causa destrucción celular (hemólisis).
+                                </li>
+                                <li class="bg-white p-3 rounded-lg shadow-sm">
+                                    <strong class="text-blue-800 block mb-1">❓ ¿Relación con Anemia Falciforme?</strong>
+                                    R: Son "adaptaciones paralelas". Ambas usan la Selección Balanceadora para proteger contra la misma amenaza: la Malaria.
+                                </li>
+                                <li class="bg-white p-3 rounded-lg shadow-sm">
+                                    <strong class="text-blue-800 block mb-1">❓ ¿Tratamiento actual?</strong>
+                                    R: Transfusiones crónicas, quelación (eliminar hierro) y trasplante de médula ósea (cura).
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                `
+            }
+        ];
+
+        // --- ESTADO DE LA APLICACIÓN ---
+        let currentSlideIndex = 0;
+        const totalSlides = slides.length;
+
+        // --- REFERENCIAS AL DOM ---
+        const dom = {
+            container: document.getElementById('slide-container'),
+            title: document.getElementById('slide-title'),
+            subtitle: document.getElementById('slide-subtitle'),
+            iconContainer: document.getElementById('slide-icon-container'),
+            content: document.getElementById('slide-content'),
+            slideNumber: document.getElementById('slide-number'),
+            totalSlides: document.getElementById('total-slides'),
+            footer: document.getElementById('slide-footer'),
+            progressBar: document.getElementById('progress-bar'),
+            
+            // Controles
+            btnNext: document.getElementById('btn-next'),
+            btnPrev: document.getElementById('btn-prev'),
+            btnFull: document.getElementById('btn-fullscreen'),
+            ctrlCurrent: document.getElementById('ctrl-current'),
+            ctrlTotal: document.getElementById('ctrl-total')
+        };
+
+        // --- INICIALIZACIÓN ---
+        dom.totalSlides.textContent = totalSlides;
+        dom.ctrlTotal.textContent = totalSlides;
+        renderSlide(0);
+
+        // --- FUNCIONES ---
+        function renderSlide(index) {
+            const slide = slides[index];
+            
+            // Actualizar Clases del Contenedor (Fondo)
+            dom.container.className = `relative w-full max-w-6xl aspect-video ${slide.bgClass} shadow-2xl rounded-xl overflow-hidden flex flex-col transition-all duration-500`;
+
+            // Actualizar Textos
+            dom.title.textContent = slide.title;
+            dom.title.className = `text-2xl md:text-3xl font-bold transition-colors duration-300 ${slide.titleColor}`;
+            
+            dom.subtitle.textContent = slide.subtitle || "";
+            dom.slideNumber.textContent = index + 1;
+            dom.ctrlCurrent.textContent = index + 1;
+            dom.footer.textContent = slide.footer;
+
+            // Actualizar Icono del Título
+            if (slide.icon) {
+                dom.iconContainer.classList.remove('hidden');
+                dom.iconContainer.innerHTML = `<i data-lucide="${slide.icon}"></i>`;
+            } else {
+                dom.iconContainer.classList.add('hidden');
+                dom.iconContainer.innerHTML = '';
+            }
+
+            // Actualizar Contenido HTML
+            // Pequeño truco para reiniciar la animación fade-in
+            dom.content.classList.remove('fade-in');
+            void dom.content.offsetWidth; // trigger reflow
+            dom.content.classList.add('fade-in');
+            dom.content.innerHTML = slide.content;
+
+            // Barra de Progreso
+            const progress = ((index + 1) / totalSlides) * 100;
+            dom.progressBar.style.width = `${progress}%`;
+
+            // Estado de Botones
+            dom.btnPrev.disabled = index === 0;
+            dom.btnNext.disabled = index === totalSlides - 1;
+            dom.btnPrev.style.opacity = index === 0 ? "0.5" : "1";
+            dom.btnNext.style.opacity = index === totalSlides - 1 ? "0.5" : "1";
+
+            // RE-RENDERIZAR ICONOS
+            lucide.createIcons();
+        }
+
+        function nextSlide() {
+            if (currentSlideIndex < totalSlides - 1) {
+                currentSlideIndex++;
+                renderSlide(currentSlideIndex);
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlideIndex > 0) {
+                currentSlideIndex--;
+                renderSlide(currentSlideIndex);
+            }
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        }
+
+        // --- EVENT LISTENERS ---
+        dom.btnNext.addEventListener('click', nextSlide);
+        dom.btnPrev.addEventListener('click', prevSlide);
+        dom.btnFull.addEventListener('click', toggleFullscreen);
+
+        // Teclado
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === 'Space') nextSlide();
+            if (e.key === 'ArrowLeft') prevSlide();
+        });
+
+    </script>
+</body>
+</html>
